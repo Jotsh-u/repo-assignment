@@ -1,38 +1,31 @@
 package com.myrepo.base
 
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import com.myrepo.ui.MainViewModel
+import androidx.lifecycle.Observer
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
 
 abstract class BaseActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: MainViewModel
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        mainHandler = Handler(Looper.getMainLooper())
-    }
-
-    lateinit var mainHandler: Handler
-
-    private val updateTextTask = object : Runnable {
-        override fun run() {
-            viewModel.getRepoLists("Q",this@BaseActivity)
-            mainHandler.postDelayed(this, 7200000)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mainHandler.removeCallbacks(updateTextTask)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mainHandler.post(updateTextTask)
+    fun periodicWorkManager(){
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<BackupWorker>(15, TimeUnit.MINUTES).build()
+        val workManager =WorkManager.getInstance(applicationContext)
+        workManager.enqueueUniquePeriodicWork(
+            "UpdateRecord",
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,periodicWorkRequest
+        )
+        workManager.getWorkInfosForUniqueWorkLiveData("UpdateRecord").observe(this,
+            object : Observer<List<WorkInfo>> {
+                override fun onChanged(value: List<WorkInfo>) {
+                    if(value!=null && (!(value.isEmpty()))) {
+                        val info = value.get(0)
+                        Log.e("WORK","MAN>> ${info.state}")
+                    }
+                }
+            })
     }
 }

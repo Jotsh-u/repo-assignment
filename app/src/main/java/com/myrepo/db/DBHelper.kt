@@ -3,20 +3,20 @@ package com.myrepo.db
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-class DBHelper (context: Context, factory: SQLiteDatabase.CursorFactory?) :
+class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     SQLiteOpenHelper(context, DATABASE_NAME, factory, DATABASE_VERSION) {
 
-    companion object{
+    companion object {
         private const val DATABASE_NAME = "TRENDING_REPO"
         private const val DATABASE_VERSION = 1
 
         const val TABLE_NAME = "REPO_TABLE"
         const val ID_COL = "ID_COL"
         const val FORKS_COUNT_COL = "forksCount"
+        const val AVTAR_URL_COL = "avtar_url"
         const val FULL_NAME_COL = "full_Name"
         const val DESCRIPTION_COL = "description"
         const val LANGUAGE_COL = "language"
@@ -28,6 +28,7 @@ class DBHelper (context: Context, factory: SQLiteDatabase.CursorFactory?) :
         val query = ("CREATE TABLE " + TABLE_NAME + " ("
                 + ID_COL + " INTEGER PRIMARY KEY, " +
                 FORKS_COUNT_COL + " INTEGER," +
+                AVTAR_URL_COL + " TEXT," +
                 FULL_NAME_COL + " TEXT," +
                 DESCRIPTION_COL + " TEXT," +
                 LANGUAGE_COL + " TEXT," +
@@ -42,9 +43,10 @@ class DBHelper (context: Context, factory: SQLiteDatabase.CursorFactory?) :
         onCreate(db)
     }
 
-    fun insertRepoData(data : RepoData){
+    fun insertRepoData(data: RepoData) {
         val values = ContentValues()
         values.put(FORKS_COUNT_COL, data.forksCount)
+        values.put(AVTAR_URL_COL, data.avatarUrl)
         values.put(FULL_NAME_COL, data.fullName)
         values.put(DESCRIPTION_COL, data.description)
         values.put(LANGUAGE_COL, data.language)
@@ -55,16 +57,12 @@ class DBHelper (context: Context, factory: SQLiteDatabase.CursorFactory?) :
         db.close()
     }
 
-    private fun getRepoDataCursor(tableName: String): Cursor? {
-        val db = this.readableDatabase
-        return db.rawQuery("SELECT * FROM $tableName", null)
-//        return db.rawQuery("SELECT * FROM " + TABLE_NAME, null)
-    }
-
     @SuppressLint("Range")
-    fun getAllRepoTableData() : ArrayList<RepoData>{
-        val cursor = getRepoDataCursor(TABLE_NAME)
-        val list : ArrayList<RepoData> = arrayListOf()
+    fun getAllRepoTableData(): ArrayList<RepoData> {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME", null)
+
+        val list: ArrayList<RepoData> = arrayListOf()
         if (cursor?.moveToFirst() == true) {
             do {
                 list.add(
@@ -75,21 +73,25 @@ class DBHelper (context: Context, factory: SQLiteDatabase.CursorFactory?) :
                         cursor.getString(cursor.getColumnIndex(LANGUAGE_COL)),
                         cursor.getInt(cursor.getColumnIndex(STARGAZERS_COUNT_COL)),
                         cursor.getInt(cursor.getColumnIndex(FORKS_COL)),
+                        cursor.getString(cursor.getColumnIndex(AVTAR_URL_COL)),
                     )
                 )
             } while (cursor.moveToNext())
         }
         cursor?.close()
+        db.close()
         return list
     }
 
 }
 
 data class RepoData(
-     val forksCount: Int? =0,
-    val fullName: String?="",
-    val description: String?="",
-    val language: String?="",
-    val stargazersCount: Int?=0,
-    val forks: Int?=0,
-)
+    val forksCount: Int? = 0,
+    val fullName: String? = "",
+    val description: String? = "",
+    val language: String? = "",
+    val stargazersCount: Int? = 0,
+    val forks: Int? = 0,
+    val avatarUrl: String? = "",
+    val contributorUrl: String? = "",
+    )

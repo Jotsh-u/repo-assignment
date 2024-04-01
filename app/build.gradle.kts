@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("kotlin-kapt")
 }
 
 android {
@@ -77,5 +78,13 @@ dependencies {
     implementation(libs.androidx.swiperefreshlayout)
     //WORK
     implementation("androidx.work:work-runtime-ktx:2.9.0")
-
+    androidTestImplementation("androidx.work:work-testing:2.9.0")
+    //Glide
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    //Room
+    val roomVersion = "2.6.0"
+    implementation("androidx.room:room-ktx:$roomVersion")
+    implementation("androidx.room:room-runtime:$roomVersion")
+    annotationProcessor("androidx.room:room-compiler:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
 }

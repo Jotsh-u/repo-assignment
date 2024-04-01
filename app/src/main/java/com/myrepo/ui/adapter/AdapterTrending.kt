@@ -1,28 +1,34 @@
 package com.myrepo.ui.adapter
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.AppCompatTextView
-import androidx.cardview.widget.CardView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
-import com.myrepo.R
+import androidx.recyclerview.widget.RecyclerView.HORIZONTAL
+import com.myrepo.MyApp
 import com.myrepo.databinding.AdapterRepoItemBinding
-import com.myrepo.db.RepoData
+import com.myrepo.db.UserRepo
+import com.myrepo.model.Owner
+import com.myrepo.network.RetrofitClient
+import com.myrepo.utill.getColorBasedOnLang
+import com.myrepo.utill.showCircularImage
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class AdapterTrending(
-    private val list: ArrayList<RepoData>
+    private val list: ArrayList<UserRepo>
 ) : Adapter<AdapterTrending.ViewHolder>() {
 
     private var lastPosition = -1
 
-    inner class ViewHolder(itemView: AdapterRepoItemBinding) :
-        RecyclerView.ViewHolder(itemView.root)
+    inner class ViewHolder(val binding: AdapterRepoItemBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -42,36 +48,43 @@ class AdapterTrending(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val model = list[position]
         with(holder) {
-            itemView.findViewById<AppCompatTextView>(R.id.txtTodayStar).text =
+            MyApp.INSTANCE.applicationContext.showCircularImage(
+                binding.imgUserAvtar,
+                model.avatarUrl.toString()
+            )
+            binding.txtTodayStar.text =
                 model.forksCount.toString().plus(" stars today")
-            itemView.findViewById<AppCompatTextView>(R.id.txtRepoName).text =
+            binding.txtRepoName.text =
                 model.fullName.toString()
-            itemView.findViewById<AppCompatTextView>(R.id.txtRepoDescription).text =
+            binding.txtRepoDescription.text =
                 model.description.toString()
-            itemView.findViewById<AppCompatTextView>(R.id.txtLanguageType).text =
+            binding.txtLanguageType.text =
                 model.language.toString()
-            itemView.findViewById<AppCompatTextView>(R.id.txtTotalStars).text =
+            binding.txtTotalStars.text =
                 model.stargazersCount.toString()
-            itemView.findViewById<AppCompatTextView>(R.id.txtTotalForks).text =
+            binding.txtTotalForks.text =
                 model.forks.toString()
 
-            val view = itemView.findViewById<ConstraintLayout>(R.id.conColExpand)
+            binding.imgLanguageColor.setBackgroundColor(
+                model.language.toString().getColorBasedOnLang()
+            )
+
+//            model.contributorUrl?.let { getContributor(it,binding.rvCollaborator) }
+            val view = binding.conColExpand
             if (lastPosition == position) {
-                if (view.isVisible) {
-                    view.visibility = View.GONE
+                view.visibility = if (view.isVisible) {
+                    View.GONE
                 } else {
-                    view.visibility = View.VISIBLE
+                    View.VISIBLE
                 }
             } else {
                 view.visibility = View.GONE
             }
 
-
-            itemView.findViewById<AppCompatImageView>(R.id.imgFavorite).setOnClickListener {
+            binding.imgFavorite.setOnClickListener {
 
             }
-            itemView.findViewById<CardView>(R.id.cardView).setOnClickListener {
-
+            binding.cardView.setOnClickListener {
                 lastPosition = if (lastPosition != position) {
                     position
                 } else {
@@ -80,5 +93,29 @@ class AdapterTrending(
                 notifyDataSetChanged()
             }
         }
+    }
+
+    private fun getContributor(urlLString: String, rvList: RecyclerView) {
+        RetrofitClient.apiService.getContributorRepo(urlLString)
+            .enqueue(object : Callback<ArrayList<Owner>> {
+                override fun onResponse(
+                    call: Call<ArrayList<Owner>>,
+                    response: Response<ArrayList<Owner>>
+                ) {
+                    if (response.isSuccessful) {
+                        if (response.body() != null) {
+                            rvList.apply {
+                                layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
+                                val list: ArrayList<Owner> = response.body()!!
+                                adapter = AdapterContributor(context, list)
+                            }
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<ArrayList<Owner>>, t: Throwable) {
+                    Log.e("ERROR", "${t.message}")
+                }
+            })
     }
 }

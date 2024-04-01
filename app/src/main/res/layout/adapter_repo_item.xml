@@ -1,122 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/cardView"
-    android:clickable="true"
-    android:foreground="?android:attr/selectableItemBackground"
-    android:layout_marginTop="@dimen/margin_normal_xxxx"
-    android:layout_marginHorizontal="@dimen/margin_normal_xxxx"
-    app:cardCornerRadius="@dimen/margin_small_x"
-    app:cardElevation="2dp"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:focusable="true">
+    android:id="@+id/cardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/margin_normal_xxxx"
+    android:layout_marginTop="@dimen/margin_normal_xxxx"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardCornerRadius="@dimen/margin_small_x"
+    app:cardElevation="2dp">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/margin_small_xxxx">
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgUserAvtar"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/txtTodayStar" />
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/txtTodayStar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            tools:text="321 stars today"
+            android:layout_marginStart="@dimen/margin_small"
             android:drawableStart="@drawable/ic_trending_black"
             android:drawablePadding="@dimen/margin_small"
-            android:lines="1"
             android:gravity="center_vertical"
+            android:lines="1"
             android:textColor="@color/color_trending_stars"
             android:textSize="@dimen/text_size_normal_xxxx"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/imgFavorite"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintStart_toEndOf="@id/imgUserAvtar"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="321 stars today" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/imgFavorite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_heart"
-            app:layout_constraintTop_toTopOf="@id/txtTodayStar"
             app:layout_constraintBottom_toBottomOf="@id/txtTodayStar"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/txtTodayStar"/>
+            app:layout_constraintStart_toEndOf="@id/txtTodayStar"
+            app:layout_constraintTop_toTopOf="@id/txtTodayStar" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/txtRepoName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            tools:text="TanStack / query"
+            android:layout_marginStart="@dimen/margin_small"
             android:layout_marginTop="4dp"
             android:lines="1"
             android:textColor="@color/title_dark_blue"
             android:textSize="@dimen/text_size_medium_x"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/txtTodayStar"/>
+            app:layout_constraintStart_toEndOf="@id/imgUserAvtar"
+            app:layout_constraintTop_toBottomOf="@id/txtTodayStar"
+            tools:text="TanStack / query" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/conColExpand"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/conColExpand"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/txtRepoName">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtRepoDescription"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/txtRepoName"
+                android:layout_marginTop="4dp"
+                android:lineSpacingExtra="2dp"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_size_normal_xx"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/txtRepoDescription"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    tools:text="Powerful asynchronous state management, server-state utilities and data fetching for the web. TS/JS, React Query, Solid Query, Svelte Query and Vue Query."
-                    android:lineSpacingExtra="2dp"
-                    android:layout_marginTop="4dp"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/text_size_normal_xx"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Powerful asynchronous state management, server-state utilities and data fetching for the web. TS/JS, React Query, Solid Query, Svelte Query and Vue Query." />
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/txtLanguageType"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="Python"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/text_size_normal_xx"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/txtRepoDescription"
-                    android:layout_marginTop="@dimen/margin_small_xxx"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCollaborator"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                tools:itemCount="4"
+                android:layout_marginTop="@dimen/margin_small"
+                tools:listitem="@layout/adapter_colab_item"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/txtRepoDescription"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/txtTotalStars"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin_normal_xx"
-                    android:drawableStart="@drawable/ic_star"
-                    android:drawablePadding="@dimen/margin_small"
-                    tools:text="26,265"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/text_size_normal_xx"
-                    app:layout_constraintTop_toTopOf="@id/txtLanguageType"
-                    app:layout_constraintStart_toEndOf="@id/txtLanguageType"
-                    app:layout_constraintBottom_toBottomOf="@id/txtLanguageType"/>
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgLanguageColor"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginTop="@dimen/margin_small_xxx"
+                app:layout_constraintTop_toBottomOf="@id/rvCollaborator"
+                app:layout_constraintStart_toStartOf="parent"
+                android:background="@color/black" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtLanguageType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_size_normal_xx"
+                app:layout_constraintTop_toTopOf="@id/imgLanguageColor"
+                app:layout_constraintBottom_toBottomOf="@id/imgLanguageColor"
+                app:layout_constraintStart_toEndOf="@id/imgLanguageColor"
+                android:layout_marginStart="@dimen/margin_small"
+                tools:text="Python" />
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/txtTotalForks"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin_normal_xx"
-                    android:drawableStart="@drawable/ic_fork"
-                    android:drawablePadding="@dimen/margin_small"
-                    tools:text="5,235"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/text_size_normal_xx"
-                    app:layout_constraintTop_toTopOf="@id/txtTotalStars"
-                    app:layout_constraintStart_toEndOf="@id/txtTotalStars"
-                    app:layout_constraintBottom_toBottomOf="@id/txtTotalStars"/>
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtTotalStars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_normal_xx"
+                android:drawableStart="@drawable/ic_star"
+                android:drawablePadding="@dimen/margin_small"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_size_normal_xx"
+                app:layout_constraintBottom_toBottomOf="@id/txtLanguageType"
+                app:layout_constraintStart_toEndOf="@id/txtLanguageType"
+                app:layout_constraintTop_toTopOf="@id/txtLanguageType"
+                tools:text="26,265" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtTotalForks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_normal_xx"
+                android:drawableStart="@drawable/ic_fork"
+                android:drawablePadding="@dimen/margin_small"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_size_normal_xx"
+                app:layout_constraintBottom_toBottomOf="@id/txtTotalStars"
+                app:layout_constraintStart_toEndOf="@id/txtTotalStars"
+                app:layout_constraintTop_toTopOf="@id/txtTotalStars"
+                tools:text="5,235" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

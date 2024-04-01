@@ -5,8 +5,8 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.myrepo.db.DBHelper
-import com.myrepo.db.RepoData
+import com.myrepo.db.DBRepository
+import com.myrepo.db.UserRepo
 import com.myrepo.model.Resource
 import com.myrepo.model.TrendingResponse
 import com.myrepo.network.RetrofitClient
@@ -16,52 +16,81 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class MainViewModel : ViewModel() {
-
-    val repoLiveData = MutableLiveData<Resource<ArrayList<RepoData>>>()
-
-    fun getRepoLists(search: String?,context:Context){
+    val repoLiveData = MutableLiveData<Resource<ArrayList<UserRepo>>>()
+    fun dataFromDB(context: Context) {
         repoLiveData.value = Resource.Loading()
         viewModelScope.launch {
+            try {
+                val listRoom = DBRepository.getRepoData(context)!!
+                val list: ArrayList<UserRepo> = arrayListOf()
+                listRoom.forEach {
+                    list.add(it)
+                }
+                repoLiveData.value = Resource.Success(list)
+            } catch (e: Exception) {
+                repoLiveData.value = Resource.Error("Something went wrong")
+            }
+        }
+    }
 
-            RetrofitClient.apiService.getTrendingRepo(search).enqueue(object : Callback<TrendingResponse> {
-                override fun onResponse(call: Call<TrendingResponse>, response: Response<TrendingResponse>) {
-                    if (response.isSuccessful){
-                        if (response.body()!=null){
+    suspend fun getRepoData(context: Context): List<UserRepo>? {
+        return DBRepository.getRepoData(context)!!
+    }
 
-                            val db = DBHelper(context, null)
-                            val list : ArrayList<RepoData> = arrayListOf()
-                            response.body()!!.items.forEach {
-                                val model =RepoData(
-                                    forksCount = it.forksCount,
-                                    fullName = it.fullName,
-                                    description = it.description,
-                                    language = it.language,
-                                    stargazersCount = it.stargazersCount,
-                                    forks = it.forks
+    fun insertRepoData(context: Context, data: UserRepo) {
+        return DBRepository.insertData(context, data)
+    }
+
+    fun deleteAllRecord(context: Context) {
+        return DBRepository.deleteAllRecord(context)
+    }
+
+    fun getRepoLists(search: String?, context: Context) {
+        repoLiveData.value = Resource.Loading()
+        viewModelScope.launch {
+            RetrofitClient.apiService.getTrendingRepo(search)
+                .enqueue(object : Callback<TrendingResponse> {
+                    override fun onResponse(
+                        call: Call<TrendingResponse>,
+                        response: Response<TrendingResponse>
+                    ) {
+                        if (response.isSuccessful) {
+                            if (response.body() != null) {
+                                val list: ArrayList<UserRepo> = arrayListOf()
+                                response.body()!!.items.forEach {
+                                    val modelUser = UserRepo(
+                                        forksCount = it.forksCount,
+                                        fullName = it.fullName,
+                                        description = it.description,
+                                        language = it.language,
+                                        stargazersCount = it.stargazersCount,
+                                        forks = it.forks,
+                                        avatarUrl = it.owner?.avatarUrl,
+                                        contributorUrl = it.contributorsUrl
+                                    )
+                                    insertRepoData(context, modelUser)
+                                    list.add(modelUser)
+                                }
+                                repoLiveData.value = Resource.Success(list)
+                            } else {
+                                repoLiveData.value = Resource.Error(
+                                    "Something went wrong.",
+                                    arrayListOf()
                                 )
-                                db.insertRepoData(model)
-                                list.add(model)
                             }
-//                            repoLiveData.value = Resource.Success(response.body()!!.items)
-                            repoLiveData.value = Resource.Success(list)
                         } else {
-                            repoLiveData.value = Resource.Error("Something went wrong.",
+                            repoLiveData.value = Resource.Error(
+                                "Something went wrong.",
                                 arrayListOf()
                             )
                         }
-                    }else {
-                        repoLiveData.value = Resource.Error("Something went wrong.",
-                            arrayListOf()
-                        )
                     }
-                }
 
-                override fun onFailure(call: Call<TrendingResponse>, t: Throwable) {
-                    Log.e("ERROR","${t.message}")
-                    repoLiveData.value = Resource.Error("${t.message}", arrayListOf())
-                }
-
-            })
+                    override fun onFailure(call: Call<TrendingResponse>, t: Throwable) {
+                        Log.e("ERROR", "${t.message}")
+                        repoLiveData.value = Resource.Error("${t.message}", arrayListOf())
+                    }
+                })
         }
     }
 }

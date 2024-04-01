@@ -17,10 +17,10 @@ import com.myrepo.R
 import com.myrepo.base.BaseActivity
 import com.myrepo.databinding.LayoutNoDataBinding
 import com.myrepo.databinding.MainActivityBinding
-import com.myrepo.db.DBHelper
-import com.myrepo.db.RepoData
+import com.myrepo.db.UserRepo
 import com.myrepo.model.Resource
 import com.myrepo.ui.adapter.AdapterTrending
+import com.myrepo.utill.ConnectionManager
 import com.myrepo.utill.hideKeyboard
 import com.myrepo.utill.showSnackBar
 
@@ -29,28 +29,23 @@ class MainActivity : BaseActivity() {
     private lateinit var bindingNoData: LayoutNoDataBinding
     private lateinit var viewModel: MainViewModel
     private var adapterTrending: AdapterTrending? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = MainActivityBinding.inflate(layoutInflater)
         bindingNoData = LayoutNoDataBinding.bind(binding.root)
         setContentView(binding.root)
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        periodicWorkManager()
         init()
         setOnClickListener()
         observerHandler()
-//        viewModel.getRepoLists("Q",this)
         checkInternetConnectivity()
     }
 
     private fun setOnClickListener() {
         bindingNoData.btnRetry.setOnClickListener {
             binding.includeNoData.visibility = View.GONE
-            if (checkInternetConnectivity()) {
-                viewModel.getRepoLists("Q", this)
-            } else {
-                dataFromDB()
-            }
+            checkInternetConnectivity()
         }
 
         binding.imgSearch.setOnClickListener {
@@ -58,22 +53,24 @@ class MainActivity : BaseActivity() {
         }
         binding.imgBack.setOnClickListener {
             searchVisibility(false)
-//            onBackPressedDispatcher.onBackPressed()
+            checkInternetConnectivity()
         }
 
         binding.edtSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (s?.length?.rem(3) == 0) {
                     viewModel.getRepoLists(s.toString(), this@MainActivity)
                 }
             }
+
             override fun afterTextChanged(s: Editable?) {
             }
         })
 
-        binding.edtSearch.setOnEditorActionListener { v, actionId, event ->
+        binding.edtSearch.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 v?.rootView?.let { hideKeyboard(it) }
                 true
@@ -90,8 +87,7 @@ class MainActivity : BaseActivity() {
         binding.refreshLayout.setOnRefreshListener {
             binding.rvTrendingList.visibility = View.GONE
             binding.refreshLayout.isRefreshing = false
-//            if (checkInternetConnectivity())
-            viewModel.getRepoLists("Q", this)
+            checkInternetConnectivity()
         }
     }
 
@@ -132,11 +128,12 @@ class MainActivity : BaseActivity() {
     private fun emptyDataLayoutHandler(
         isVisible: Boolean,
         title: String? = null,
-        subTitle: String? = null
+        subTitle: String? = null,
+        isConnected: Boolean = true
     ) {
         binding.includeNoData.visibility = if (isVisible) View.VISIBLE else View.GONE
         if (isVisible) {
-            if (!checkInternetConnectivity()) {
+            if (!isConnected) {
                 bindingNoData.txtNoData.text = getString(R.string.no_internet)
             } else {
                 bindingNoData.txtNoData.text = title
@@ -163,7 +160,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun setRepoListAdapter(list: ArrayList<RepoData>) {
+    private fun setRepoListAdapter(list: ArrayList<UserRepo>) {
         if (list.size > 0) {
             binding.rvTrendingList.visibility = View.VISIBLE
             binding.refreshLayout.visibility = View.VISIBLE
@@ -187,45 +184,18 @@ class MainActivity : BaseActivity() {
             binding.imgBack.visibility = View.GONE
             binding.txtTitle.visibility = View.VISIBLE
             binding.imgSearch.visibility = View.VISIBLE
+            binding.imgSearch.rootView?.let { hideKeyboard(it) }
         }
-
     }
 
-    private fun checkInternetConnectivity(): Boolean {
-        val connectivityManager =
-            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        val network: Network?
-        val networkCapability: NetworkCapabilities?
-
-        val isConnected: Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            network = connectivityManager.activeNetwork
-            networkCapability = connectivityManager.getNetworkCapabilities(network)
-
-            networkCapability?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                ?: false
-        } else {
-            @Suppress("DEPRECATION")
-            connectivityManager.activeNetworkInfo?.isConnectedOrConnecting == true
-        }
-
-
+    private fun checkInternetConnectivity() {
+        val isConnected = ConnectionManager.isInternetConnectivityAvailable(this)
         if (!isConnected) {
-            showSnackBar(binding.includeHeader)
-            val db = DBHelper(this, null)
-            val list = db.getAllRepoTableData()
-            setRepoListAdapter(list)
+            binding.includeHeader.showSnackBar()
+            emptyDataLayoutHandler(isVisible = true, isConnected = false)
+            viewModel.dataFromDB(this)
         } else {
             viewModel.getRepoLists("Q", this)
         }
-
-        return isConnected
     }
-
-    private fun dataFromDB() {
-        val db = DBHelper(this, null)
-        val list = db.getAllRepoTableData()
-        setRepoListAdapter(list)
-    }
-
 }
