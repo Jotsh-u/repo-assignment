@@ -17,16 +17,26 @@ import retrofit2.Response
 
 class MainViewModel : ViewModel() {
     val repoLiveData = MutableLiveData<Resource<ArrayList<UserRepo>>>()
-    fun dataFromDB(context: Context) {
+    fun dataFromDB(context: Context, searchKeyword: String? = null) {
         repoLiveData.value = Resource.Loading()
         viewModelScope.launch {
             try {
-                val listRoom = DBRepository.getRepoData(context)!!
+                val listRoom =
+                    if (searchKeyword == null) DBRepository.getRepoData(context)!! else DBRepository.getAllSearchData(
+                        context,
+                        searchKeyword
+                    )!!
                 val list: ArrayList<UserRepo> = arrayListOf()
                 listRoom.forEach {
                     list.add(it)
                 }
-                repoLiveData.value = Resource.Success(list)
+                if (list.size == 0) {
+                    val strSearchKey = searchKeyword ?: "Q"
+                    getRepoLists(strSearchKey, context)
+                } else {
+                    repoLiveData.value = Resource.Success(list)
+                }
+//                repoLiveData.value = Resource.Success(list)
             } catch (e: Exception) {
                 repoLiveData.value = Resource.Error("Something went wrong")
             }
@@ -45,7 +55,7 @@ class MainViewModel : ViewModel() {
         return DBRepository.deleteAllRecord(context)
     }
 
-    fun getRepoLists(search: String?, context: Context) {
+    private fun getRepoLists(search: String?, context: Context) {
         repoLiveData.value = Resource.Loading()
         viewModelScope.launch {
             RetrofitClient.apiService.getTrendingRepo(search)

@@ -57,7 +57,8 @@ class MainActivity : BaseActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (s?.length?.rem(3) == 0) {
-                    viewModel.getRepoLists(s.toString(), this@MainActivity)
+//                    viewModel.getRepoLists(s.toString(), this@MainActivity)
+                    viewModel.dataFromDB(this@MainActivity, s.toString())
                 }
             }
 
@@ -164,7 +165,7 @@ class MainActivity : BaseActivity() {
             binding.refreshLayout.visibility = View.GONE
         }
         emptyDataLayoutHandler(!binding.rvTrendingList.isVisible, "No Data Available")
-        adapterTrending = AdapterTrending(list)
+        adapterTrending = AdapterTrending(this,list)
         binding.rvTrendingList.adapter = adapterTrending
     }
 
@@ -188,9 +189,10 @@ class MainActivity : BaseActivity() {
         if (!isConnected) {
             binding.includeHeader.showSnackBar()
             emptyDataLayoutHandler(isVisible = true, isConnected = false)
-            viewModel.dataFromDB(this)
-        } else {
+
+        } /*else {
             viewModel.getRepoLists("Q", this)
-        }
+        }*/
+        viewModel.dataFromDB(this)
     }
 }

@@ -13,8 +13,13 @@ import com.google.android.material.snackbar.Snackbar
 import com.myrepo.R
 
 fun Context.hideKeyboard(view: View) {
-    val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+    try {
+        val inputMethodManager =
+            getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+    }catch (e:Exception){
+        e.printStackTrace()
+    }
 }
 
 fun View.showSnackBar() {

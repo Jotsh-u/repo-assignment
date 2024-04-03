@@ -14,36 +14,14 @@ import retrofit2.Response
 
 class BackupWorker(val context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
-
-
     override suspend fun doWork(): Result {
-        try {
-            Log.e("WORK","Success Call WORK MANAGER")
-           /* val response  =RetrofitClient.apiService.getTrendingRepo("Q").execute()
-            if (response.body()!!.items.size > 0) {
-                response.body()!!.items.forEach {
-                    val modelUser = UserRepo(
-                        forksCount = it.forksCount,
-                        fullName = it.fullName,
-                        description = it.description,
-                        language = it.language,
-                        stargazersCount = it.stargazersCount,
-                        forks = it.forks,
-                        avatarUrl = it.owner?.avatarUrl,
-                        contributorUrl = it.contributorsUrl
-                    )
-                    insertRepoData(context, modelUser)
-                }
-            }*/
+        return try {
             apiCall()
-            return Result.success()
         }catch (e:Exception) {
             e.printStackTrace()
             Log.e("WORK","failure...${e.message}")
-            return Result.failure()
+            Result.failure()
         }
-
-//        return Result.success()
     }
 
     fun insertRepoData(context: Context, data: UserRepo) {
@@ -54,8 +32,8 @@ class BackupWorker(val context: Context, params: WorkerParameters) : CoroutineWo
         return DBRepository.deleteAllRecord(context)
     }
 
-    private suspend fun apiCall() {
-        Log.e("WORK","WORK MANAGER")
+    private suspend fun apiCall() : Result {
+//        Log.e("WORK","WORK MANAGER")
         RetrofitClient.apiService.getTrendingRepo("Q")
             .enqueue(object : Callback<TrendingResponse> {
                 override fun onResponse(
@@ -64,7 +42,6 @@ class BackupWorker(val context: Context, params: WorkerParameters) : CoroutineWo
                 ) {
                     if (response.isSuccessful) {
                         if (response.body() != null) {
-
 //                            deleteAllRecord(context)
                             if (response.body()!!.items.size > 0) {
                                 response.body()!!.items.forEach {
@@ -89,5 +66,6 @@ class BackupWorker(val context: Context, params: WorkerParameters) : CoroutineWo
                     Log.e("ERROR", "${t.message}")
                 }
             })
+        return  Result.success()
     }
 }

@@ -1,6 +1,7 @@
 package com.myrepo.ui.adapter
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.HORIZONTAL
 import com.myrepo.MyApp
+import com.myrepo.R
 import com.myrepo.databinding.AdapterRepoItemBinding
 import com.myrepo.db.UserRepo
 import com.myrepo.model.Owner
@@ -22,10 +24,12 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class AdapterTrending(
+    private val context: Context,
     private val list: ArrayList<UserRepo>
 ) : Adapter<AdapterTrending.ViewHolder>() {
 
     private var lastPosition = -1
+    private var lastFavPosition = -1
 
     inner class ViewHolder(val binding: AdapterRepoItemBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -72,24 +76,24 @@ class AdapterTrending(
 //            model.contributorUrl?.let { getContributor(it,binding.rvCollaborator) }
             val view = binding.conColExpand
             if (lastPosition == position) {
-                view.visibility = if (view.isVisible) {
-                    View.GONE
+                if (view.isVisible) {
+                    view.visibility = View.GONE
                 } else {
-                    View.VISIBLE
+                    view.visibility = View.VISIBLE
                 }
             } else {
                 view.visibility = View.GONE
             }
+            val resID =
+                if (lastFavPosition == position) R.drawable.ic_heart_filled else R.drawable.ic_heart
+            binding.imgFavorite.setBackgroundResource(resID)
 
             binding.imgFavorite.setOnClickListener {
-
+                lastFavPosition = if (lastFavPosition != position) position else -1
+                notifyDataSetChanged()
             }
             binding.cardView.setOnClickListener {
-                lastPosition = if (lastPosition != position) {
-                    position
-                } else {
-                    -1
-                }
+                lastPosition = if (lastPosition != position) position else -1
                 notifyDataSetChanged()
             }
         }
@@ -106,7 +110,12 @@ class AdapterTrending(
                         if (response.body() != null) {
                             rvList.apply {
                                 layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
-                                val list: ArrayList<Owner> = response.body()!!
+                                val list: ArrayList<Owner> = arrayListOf()
+                                response.body()!!.forEachIndexed { index, owner ->
+                                    if (index < 3) {
+                                        list.add(owner)
+                                    }
+                                }
                                 adapter = AdapterContributor(context, list)
                             }
                         }

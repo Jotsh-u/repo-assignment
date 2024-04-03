@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 abstract class BaseActivity : AppCompatActivity() {
 
     fun periodicWorkManager(){
-        val periodicWorkRequest = PeriodicWorkRequestBuilder<BackupWorker>(15, TimeUnit.MINUTES).build()
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<BackupWorker>(2, TimeUnit.HOURS).build()
         val workManager =WorkManager.getInstance(applicationContext)
         workManager.enqueueUniquePeriodicWork(
             "UpdateRecord",

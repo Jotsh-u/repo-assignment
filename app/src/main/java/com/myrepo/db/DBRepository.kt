@@ -33,7 +33,11 @@ class DBRepository {
         suspend fun getRepoData(context: Context): List<UserRepo>? {
             appDatabase = initialisationDb(context)
             listRepoData = appDatabase?.repoDao()?.getAllRepoTableData()
-//            delay(3000L)
+            return listRepoData
+        }
+        suspend fun getAllSearchData(context: Context,searchedKeyword:String): List<UserRepo>? {
+            appDatabase = initialisationDb(context)
+            listRepoData = appDatabase?.repoDao()?.getAllSearchData(searchedKeyword)
             return listRepoData
         }
     }
